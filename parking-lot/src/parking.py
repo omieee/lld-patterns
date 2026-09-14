@@ -112,7 +112,6 @@ class TicketManager:
         for tkt in self.tickets:
             if tkt["vehicle"].reg == veh.reg:
                 tkt["allotedslot"].slotstatus = SLOT_STATUS.VACANT
-                print("Tickets:", self.tickets)
                 self.tickets.remove(tkt)
                 veh.resetVehicle()
                 return True
