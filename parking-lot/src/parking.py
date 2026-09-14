@@ -36,8 +36,14 @@ class ParkingSlot:
         return self.slstatus
 
     @slotstatus.setter
-    def update_slot(self, status: SLOT_STATUS):
+    def slotstatus(self, status: SLOT_STATUS):
         self.slstatus = status
+
+    def __repr__(self) -> str:
+        return (
+            f"\nParkingSlot(Number: {self.slnumber}, Floor: {self.slfloor}, "
+            f"Fit: {self.slotfit}, Status: {self.slstatus})"
+        )
 
 
 class ParkingSlots:
@@ -46,6 +52,9 @@ class ParkingSlots:
 
     def addSlot(self, psl: ParkingSlot) -> None:
         self.parkingSlots.append(psl)
+
+    def getAllSlots(self):
+        return self.parkingSlots
 
     def getVacantSlotBasedOnSize(self, slotFit: SLOT_FIT) -> ParkingSlot | None:
         for psl in self.parkingSlots:
@@ -58,32 +67,93 @@ class Vehicle:
     def __init__(self, vtype: VEHICLE_TYPE, reg: str) -> None:
         self.vtype = vtype
         self.reg = reg
-        self.parkingSlot = None
-        self.entrytime = None
+        self.entryTime = None
+        self.slnumber = None
+        self.flnumber = None
 
-    def allotSlot(self, psls: ParkingSlots) -> ParkingSlot | None:
+    def getVehicle(self) -> dict:
+        return {
+            "vtype": self.vtype,
+            "reg": self.reg,
+            "entry": self.entryTime,
+            "slot": self.slnumber,
+            "floor": self.flnumber,
+        }
+
+    def setSlot(self, slot: int):
+        self.slnumber = slot
+
+    def setFloor(self, floor: int):
+        self.flnumber = floor
+
+    def resetVehicle(self) -> None:
+        del self
+
+
+class TicketManager:
+    def __init__(self) -> None:
+        self.tickets = []
+
+    def createTicket(self, veh: Vehicle, allotedSlot: ParkingSlot) -> dict | None:
+        if allotedSlot:
+            allotedSlot.slotstatus = SLOT_STATUS.TAKEN
+            veh.setSlot(allotedSlot.slnumber)
+            veh.setFloor(allotedSlot.slfloor)
+            out = {
+                "vehicle": veh,
+                "allotedslot": allotedSlot,
+                "allotedtime": int(datetime.now(timezone.utc).timestamp()),
+            }
+            self.tickets.append(out)
+            return out
+        return None
+
+    def closeTicket(self, veh: Vehicle) -> bool:
+        for tkt in self.tickets:
+            if tkt["vehicle"].reg == veh.reg:
+                tkt["allotedslot"].slotstatus = SLOT_STATUS.VACANT
+                print("Tickets:", self.tickets)
+                self.tickets.remove(tkt)
+                veh.resetVehicle()
+                return True
+        return False
+
+
+class ParkingManager:
+    def __init__(self, pslots: ParkingSlots) -> None:
+        self.pslots = pslots
+        self.tktmgr = TicketManager()
+
+    def park_vehicle(self, veh: Vehicle) -> dict | None:
         requiredType = None
-        if self.vtype == VEHICLE_TYPE.BIKE:
+        if veh.vtype == VEHICLE_TYPE.BIKE:
             requiredType = SLOT_FIT.SMALL
-        elif self.vtype == VEHICLE_TYPE.CAR:
+        elif veh.vtype == VEHICLE_TYPE.CAR:
             requiredType = SLOT_FIT.MEDIUM
-        elif self.vtype == VEHICLE_TYPE.TRUCK:
+        elif veh.vtype == VEHICLE_TYPE.TRUCK:
             requiredType = SLOT_FIT.LARGE
         if requiredType:
-            allocatedSlot = psls.getVacantSlotBasedOnSize(requiredType)
+            allocatedSlot = self.pslots.getVacantSlotBasedOnSize(requiredType)
             if allocatedSlot:
-                allocatedSlot.update_slot = SLOT_STATUS.TAKEN
-                self.parkingSlot = allocatedSlot.slnumber
-                self.entrytime = int(datetime.now(timezone.utc).timestamp())
-                return allocatedSlot
+                tkt = self.tktmgr.createTicket(veh=veh, allotedSlot=allocatedSlot)
+                return tkt
         return None
+
+    def unpark_vehicle(self, ticket) -> bool:
+        if ticket["allotedtime"]:
+            bill = Billing()
+            billamt = bill.calculate_bill(ticket=ticket)
+            # Handle payment here in actual for now payment is true
+            return bool(billamt and self.tktmgr.closeTicket(ticket["vehicle"]))
 
 
 class Billing:
-    def calculate_bill(self, veh: Vehicle, psls: ParkingSlots) -> int | None:
-        if veh.parkingSlot and veh.entrytime:
+    def calculate_bill(self, ticket) -> int | None:
+        if ticket["allotedtime"]:
             difference_time = (
-                int(datetime.now(timezone.utc).timestamp()) + 10000 - veh.entrytime
+                int(datetime.now(timezone.utc).timestamp())
+                + 10000
+                - ticket["allotedtime"]
             )
             if difference_time / 3600 > 2:
                 final_bill = (

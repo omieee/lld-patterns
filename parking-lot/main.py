@@ -46,20 +46,18 @@ def main():
     psls.addSlot(ps8)
     psls.addSlot(ps9)
     psls.addSlot(ps10)
-
+    pmgr = parking.ParkingManager(psls)
+    biller = parking.Billing()
     print("Hello from parking-lot! Setup is ready, we are open to serve !!")
+
     veh1 = parking.Vehicle(vtype=utils.VEHICLE_TYPE.BIKE, reg="KA0101")
-    alloted = veh1.allotSlot(psls=psls)
-
-    if alloted:
-        print(
-            f"Vehicle: {veh1.reg} of type {veh1.vtype} is allocated {alloted.slnumber}"
-        )
-    else:
-        print("Not available")
-
-    bill = parking.Billing()
-    bill.calculate_bill(veh=veh1, psls=psls)
+    ptkt = pmgr.park_vehicle(veh=veh1)
+    print(ptkt["vehicle"].getVehicle())
+    print("Bill:", biller.calculate_bill(ptkt))
+    print("Assuming bill is paid")
+    print("Before vacating let's check details: ", psls.getAllSlots())
+    pmgr.unpark_vehicle(ptkt)
+    print("After vacating let's check details: ", psls.getAllSlots())
 
 
 if __name__ == "__main__":
