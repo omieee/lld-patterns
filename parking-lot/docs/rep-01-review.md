@@ -47,3 +47,33 @@ class Billing:
 `Vehicle`: This class has details of vehicle and also adds the vehicle to a slot if vacant upon checking in.
 
 `Billing`: This class has just one function that is used at checkout it checks the time difference and generate the bil to be paid and also frees up the parking slot
+
+<hr>
+
+### Verdict till now
+
+There were some serious mistake in the above architecture which after being pointed out trying to fix here
+
+1) There are few classes which are doing too much and not in sync with naming such as `Vehicle` and `Billing`. The problem with `Vehicle` class is the responsibility to check-in and `Billing` handles checkout and slot updation 
+2) There is no Ticket concept in code which existed in requirement. A ticket is an entity which is issued against a vehicle and a spot. Ticket is closed when billing is done and then the spot is marked vacant
+3) Getter and setter . I without knowing and not used ever tried to over engineer and screwed badly. Either learn and implement properly or move to two simple functions 
+4) There is no slot vacant thing happening now. Major flaw in design 
+
+### My Verdict:
+
+Irrespective of this is first time , I performed poorly because of missing two critical design thing no Ticket, slot not vacant. This exercise also showed not much knowledge of python syntax . 
+
+### Time taken: 
+
+Was way above 90 min may be around 270 min for this thing. Planning was wrong in choosing a time when kid would be sleeping. So this planning needs to be handled next time 
+
+<hr>
+
+### How to fix above issues
+
+1) There has to be a `Ticket` class which will accept the vehicle and selected slot and open a ticket for that vehicle. 
+2) We will have a `ParkingManager` CLass that will expose `park_vehicle` and `unpark_vehicle` which will internally call teh `TicketManager` class for ticket related functiponalities
+3) There has to be `TickerManager` class that wil handle creation of ticket and closing of ticket
+4) And `Billing` is an independent class that has just to calculate bill for a given ticket and return the bill amount
+5) Fix the setter and getter
+
