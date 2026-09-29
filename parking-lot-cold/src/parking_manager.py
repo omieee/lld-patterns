@@ -72,7 +72,7 @@ class ParkingManager:
         else:
             return "Invalid Ticket"
 
-    def display_free_count(self, vehicle_type: str):
+    def display_free_count(self, vehicle_type: str = ""):
         for floor_idx, current_floor in enumerate(self.pl["floors"], start=1):
             free_count = sum(
                 1
@@ -84,7 +84,7 @@ class ParkingManager:
                 f"No. of free slots for {vehicle_type} on Floor {floor_idx}: {free_count}"
             )
 
-    def display_free_slots(self, vehicle_type: str):
+    def display_free_slots(self, vehicle_type: str = ""):
         for floor_idx, current_floor in enumerate(self.pl["floors"], start=1):
             free_slots = [
                 str(slot_idx)
@@ -95,7 +95,7 @@ class ParkingManager:
             slots_str = ",".join(free_slots)
             print(f"Free slots for {vehicle_type} on Floor {floor_idx}: {slots_str}")
 
-    def display_occupied_slots(self, vehicle_type: str):
+    def display_occupied_slots(self, vehicle_type: str = ""):
         for floor_idx, current_floor in enumerate(self.pl["floors"], start=1):
             occupied_slots = [
                 str(slot_idx)

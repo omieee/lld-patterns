@@ -2,7 +2,7 @@ import sys
 
 from src.parking import ParkingLot, ParkingSlots
 from src.parking_manager import ParkingManager
-from src.vehicle import Vehicle
+from src.vehicle import Vehicle, VehicleType
 
 
 def main():
@@ -66,12 +66,15 @@ def main():
 
         elif cmd == "display" and manager:
             display_type, vehicle_type = args[0], args[1]
-            if display_type == "free_count":
-                manager.display_free_count(vehicle_type)
-            elif display_type == "free_slots":
-                manager.display_free_slots(vehicle_type)
-            elif display_type == "occupied_slots":
-                manager.display_occupied_slots(vehicle_type)
+            if vehicle_type in VehicleType.__members__:
+                if display_type == "free_count":
+                    manager.display_free_count(vehicle_type)
+                elif display_type == "free_slots":
+                    manager.display_free_slots(vehicle_type)
+                elif display_type == "occupied_slots":
+                    manager.display_occupied_slots(vehicle_type)
+            else:
+                print(f"Vehicle type {vehicle_type} is invalid")
 
 
 if __name__ == "__main__":

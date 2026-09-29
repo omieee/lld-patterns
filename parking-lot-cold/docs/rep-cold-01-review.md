@@ -1,6 +1,7 @@
 ### AI Contribution
 1. AI contributed in creating the test case file for this
 2. AI contributed in fixing the bug in `def _can_fit(`
+3. Cursor formatted and edited the review text. The findings are mine.
 
 ### Purpose
 The purpose of this application is to run a multi-floor parking lot from the command line. A lot is created with a fixed number of floors and slots. When a vehicle arrives it is parked in the first vacant slot that matches its type, and a ticket id is printed. When the vehicle leaves, that slot is marked vacant again. The program can also print free and occupied slots, and it can add a floor or a slot after the lot is created.
@@ -74,11 +75,10 @@ The command flow works for the cases covered by the tests: create a lot, park un
 2) `Ticket` is unused. The requirement to issue a ticket is met only as a string. Unpark trusts that string, splits on `_`, and treats the slot coordinates as the ticket. Parking the same slot again reissues the same id. There is no open or closed ticket.
 3) `ParkingManager` does the allocation, the occupancy update, the ticket parse, and the printing. `_reqired_slot_type` and `_can_fit` repeat the same CAR/BIKE/TRUCK mapping, and `_find_slot` takes a vehicle type it never reads.
 4) `VehicleType` is dead. The fit rule is string comparisons in the manager.
-5) There is still no bill. Checkout frees the slot and does not record entry time or duration.
 
 ### My Verdict
 
-This pass gets the CLI behavior right and the tests lock that behavior in. The domain model is still thin: the ticket is a string, the slot is a dict, and one manager class both mutates the lot and prints it. Billing from the earlier parking-lot writeup is absent here, so this version solves park, unpark, and display, and stops there.
+This pass gets the CLI behavior right and the tests lock that behavior in. The domain model is still thin: the ticket is a string, the slot is a dict, and one manager class both mutates the lot and prints it, so this version solves park, unpark, and display, and stops there.
 
 ### Time taken
 
@@ -92,4 +92,3 @@ Total time to write my own code is 109 Minutes. then remaing 10-15 for AI assist
 2) Use `Ticket`. `park_vehicle` creates a ticket bound to the vehicle and the slot and returns its id. `unpark_vehicle` looks the ticket up, closes it, then marks the slot vacant. Stop splitting the id as the only record of the stay.
 3) Keep `ParkingManager` as the entry point for `park_vehicle` and `unpark_vehicle`. Slot search and status changes belong on the lot or the slot. Display formatting belongs in `main.py`; the manager should return the counts and slot numbers.
 4) Store `VehicleType` on `Vehicle` and use one fit rule. Drop the second copy of the CAR/MEDIUM, BIKE/SMALL, TRUCK/LARGE mapping.
-5) If hourly billing is in scope for this problem, add a `Billing` class whose only job is to take a closed ticket and return the amount. Slot freeing stays in unpark, not in billing.
